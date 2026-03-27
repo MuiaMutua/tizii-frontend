@@ -28,7 +28,7 @@ export const MOCK_STUDIOS = [
     name: "Sonic Void Labs",
     location: "Kilimani, Nairobi",
     description: "Boutique studio renowned for analog warmth. Neve 8078 console, vintage tape machines, and a curated collection of rare microphones for authentic sonic character.",
-    image_url: "https://images.unsplash.com/photo-1559732781-af5e2982d5bf?w=800&auto=format&fit=crop&q=80",
+    image_url: "https://images.unsplash.com/photo-1598653222000-6b7b7a552625?w=800&auto=format&fit=crop&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1559732781-af5e2982d5bf?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1520529612661-8270562e3640?w=800&auto=format&fit=crop&q=80",
@@ -47,7 +47,7 @@ export const MOCK_STUDIOS = [
     name: "Prism Audio",
     location: "Karen, Nairobi",
     description: "Modern production powerhouse. Fully equipped for mixing, mastering, and multimedia production with Atmos capabilities and cutting-edge monitoring.",
-    image_url: "https://images.unsplash.com/photo-1520529612661-8270562e3640?w=800&auto=format&fit=crop&q=80",
+    image_url: "https://images.unsplash.com/photo-1581313729292-697669d67562?w=800&auto=format&fit=crop&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1520529612661-8270562e3640?w=800&auto=format&fit=crop&q=80",
     ],

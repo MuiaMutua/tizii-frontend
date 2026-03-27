@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,8 +8,7 @@
    TIZII DESIGN SYSTEM — Architectural / Studio Marketplace
    Primary: #D8FF2A (Lemon)
    Secondary: #014751 (Paon Blue)
-   Black Swarm: #000000
-   Magnolia: #FFFFFF
+   Typography: Outfit (Geometric Sans / Cereal-style)
    ============================================================ */
 
 :root {
@@ -29,31 +28,10 @@
   --paon-light:    #025F6B;
   --paon-muted:    rgba(1,71,81,0.08);
   --black:         #000000;
-
-  /* Sidebar always dark */
-  --sidebar-bg:    #0A1A1C;
-  --sidebar-text:  rgba(255,255,255,0.65);
-  --sidebar-active-bg: #D8FF2A;
-  --sidebar-active-text: #000000;
-
-  /* Status */
-  --status-confirmed: #D8FF2A;
-  --status-pending:   #F0A500;
-  --status-cancelled: #E53E3E;
-  --status-settled:   #D8FF2A;
-  --status-refunded:  #E53E3E;
-  --status-processing:#F0A500;
-
-  /* Shadows */
-  --shadow-sm:  0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
-  --shadow-md:  0 4px 12px rgba(0,0,0,0.08);
-  --shadow-lg:  0 8px 30px rgba(0,0,0,0.10);
-
-  /* Radius */
-  --radius-sm:  6px;
-  --radius-md:  12px;
-  --radius-lg:  16px;
-  --radius-xl:  24px;
+  
+  /* Studio Elements */
+  --waveform-color: rgba(216,255,42,0.15);
+  --knob-bg:        #1A1A1A;
 }
 
 [data-theme="dark"] {
@@ -81,13 +59,14 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--bg);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
   transition: background-color 0.3s ease, color 0.3s ease;
+  letter-spacing: -0.01em;
 }
 
 a { text-decoration: none; color: inherit; }
@@ -99,37 +78,39 @@ input, select, textarea { font-family: inherit; }
    TYPOGRAPHY
    ============================================================ */
 .t-display {
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: clamp(2.75rem, 6vw, 4.5rem);
   font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  color: var(--text-primary);
+  line-height: 1;
+  letter-spacing: -0.04em;
 }
 
 .t-headline {
-  font-size: clamp(1.5rem, 3vw, 2.25rem);
-  font-weight: 800;
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 700;
   line-height: 1.1;
-  letter-spacing: -0.02em;
-  color: var(--text-primary);
+  letter-spacing: -0.03em;
 }
 
 .t-title {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   font-weight: 700;
   line-height: 1.3;
-  letter-spacing: -0.01em;
-  color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
-.t-body { font-size: 0.9375rem; font-weight: 400; color: var(--text-secondary); line-height: 1.65; }
-.t-small { font-size: 0.8125rem; font-weight: 500; color: var(--text-secondary); }
+.t-body { 
+  font-size: 1.0625rem; 
+  font-weight: 400; 
+  line-height: 1.6; 
+}
+
+.t-small { font-size: 0.8125rem; font-weight: 500; }
+
 .t-label {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-muted);
 }
 
 /* ============================================================
@@ -809,7 +790,7 @@ input, select, textarea { font-family: inherit; }
   .navbar-actions.mobile-show { 
     display: flex;
     position: absolute;
-    top: 240px; /* Below links */
+    top: 240px; 
     left: 0;
     right: 0;
     background: var(--bg-elevated);
@@ -820,17 +801,15 @@ input, select, textarea { font-family: inherit; }
     border-bottom: 1px solid var(--border);
     z-index: 99;
   }
-  
-  .hero-studio { min-height: 90vh !important; }
 }
 
-/* Utilities */
-.hidden { display: none; }
-.md\:hidden { display: flex; }
-@media (min-width: 768px) {
-  .md\:hidden { display: none; }
-  .md\:flex { display: flex; }
+/* Studio Global Utilities */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
-@media (min-width: 640px) {
-  .sm\:flex { display: flex; }
+.animate-spin-slow { animation: spin-slow 12s linear infinite; }
+
+.shadow-glow {
+  box-shadow: 0 0 20px rgba(216, 255, 42, 0.3);
 }
