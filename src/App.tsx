@@ -19,6 +19,10 @@ import StudioManagerDashboard from "./pages/StudioManagerDashboard";
 import StudioOwnerDashboard from "./pages/StudioOwnerDashboard";
 import StudioStaffDashboard from "./pages/StudioStaffDashboard";
 import ArtistDashboard from "./pages/ArtistDashboard";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import CookiePolicy from "./pages/CookiePolicy";
+import HelpCenter from "./pages/HelpCenter";
 
 import { DarkModeProvider } from "./contexts/DarkModeContext";
 
@@ -49,6 +53,10 @@ const App = () => {
               <Route path="/studio-owner/dashboard" element={<StudioOwnerDashboard />} />
               <Route path="/studio-staff/dashboard" element={<StudioStaffDashboard />} />
               <Route path="/artist/dashboard" element={<ArtistDashboard />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/cookies" element={<CookiePolicy />} />
+              <Route path="/help" element={<HelpCenter />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

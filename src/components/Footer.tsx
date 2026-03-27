@@ -54,10 +54,10 @@ const Footer = () => {
           {/* Legal */}
           <div className="footer-col">
             <h4>LEGAL</h4>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Cookie Policy</a>
-            <a href="#">Help Center</a>
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms of Service</a>
+            <a href="/cookies">Cookie Policy</a>
+            <a href="/help">Help Center</a>
           </div>
         </div>
 
