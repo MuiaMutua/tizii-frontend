@@ -1,157 +1,102 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { CheckCircle, Calendar, Clock, MapPin, Home, FileText, Music } from "lucide-react";
-import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
-interface ConfirmationState {
-  studio?: any;
-  room?: any;
-  selectedDates?: Date[];
-  selectedTimes?: Record<string, string[]>;
-  totalAmount?: number;
-  bookingId?: string;
-}
+// Inline Icons
+const CheckCircleIcon = () => (
+  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--lemon)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+);
+const CalendarIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+);
+const ShareIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+);
+const DownloadIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+);
 
 const BookingConfirmed = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const state = location.state as ConfirmationState | undefined;
-
-  const { studio, room, selectedDates, selectedTimes, totalAmount, bookingId } = state || {};
-
-  if (!studio) {
-    navigate("/home");
-    return null;
-  }
-
-  // Parse dates if they came as strings
-  const parsedDates = selectedDates?.map(d => new Date(d)) || [];
-
-  // Get first room/studio image
-  const imageUrl = room?.photos?.[0]?.url || studio?.gallery?.[0]?.url || "/placeholder.svg";
-
-  // Generate booking reference
-  const bookingRef = bookingId 
-    ? `BK-${bookingId.slice(0, 8).toUpperCase()}`
-    : `BK-${Date.now().toString().slice(-8)}`;
-
-  // Calculate total slots
-  const totalSlots = selectedTimes 
-    ? Object.values(selectedTimes).reduce((acc, arr) => acc + (Array.isArray(arr) ? arr.length : 0), 0)
-    : 0;
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="glass-card border-0 p-8 max-w-md w-full space-y-6 animate-fade-in">
-        <div className="flex flex-col items-center text-center space-y-4">
-          <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center animate-bounce">
-            <CheckCircle className="h-12 w-12 text-primary" />
-          </div>
-          
-          <div>
-            <h1 className="text-2xl font-bold mb-2">Booking Confirmed!</h1>
-            <p className="text-muted-foreground">
-              Your studio session has been successfully booked
-            </p>
-          </div>
+    <div className="flex-col">
+      <Navbar />
+      
+      <main className="container section-lg flex-col items-center justify-center text-center animate-fadeUp">
+        <div className="mb-8 p-6" style={{ background: 'var(--paon)', borderRadius: '100%', boxShadow: '0 0 40px rgba(216, 255, 42, 0.2)' }}>
+          <CheckCircleIcon />
         </div>
+        
+        <p className="t-label mb-3" style={{ color: 'var(--paon)' }}>SESSION ARCHITECTURE SETTLED</p>
+        <h1 className="t-display mb-6" style={{ fontSize: '3rem' }}>Booking Confirmed</h1>
+        <p className="t-body mb-12" style={{ maxWidth: 540, fontSize: '1.125rem' }}>
+          Your recording session at **The Echo Chamber** has been secured. A notification has been sent to the studio manager and house engineer.
+        </p>
 
-        <div className="space-y-3 pt-4">
-          {/* Booking Reference */}
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50">
-            <FileText className="h-5 w-5 text-primary" />
-            <div>
-              <p className="text-sm text-muted-foreground">Booking Reference</p>
-              <p className="font-semibold font-mono">{bookingRef}</p>
+        <div className="card mb-12" style={{ maxWidth: 480, width: '100%', textAlign: 'left' }}>
+          <div className="card-body-lg flex-col gap-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="t-title mb-1">Session Summary</h3>
+                <p className="t-small">Ref: #TZ-90822-EC</p>
+              </div>
+              <div className="badge badge-settled">PAID</div>
             </div>
-          </div>
 
-          {/* Studio & Room Details */}
-          <div className="flex items-start gap-3 p-3 rounded-lg bg-secondary/30">
-            <img
-              src={imageUrl}
-              alt={room?.name || studio?.name}
-              className="w-16 h-16 rounded-lg object-cover"
-              onError={(e) => { e.currentTarget.src = "/placeholder.svg"; }}
-            />
-            <div className="flex-1">
-              <h3 className="font-semibold">{studio.name}</h3>
-              {room && (
-                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Music className="h-3 w-3" />
-                  {room.name}
-                </p>
-              )}
-              <div className="text-sm text-muted-foreground mt-1">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-3.5 w-3.5" />
-                  <span>{studio.location}</span>
-                </div>
+            <div className="divider" />
+
+            <div className="flex-col gap-4">
+              <div className="flex justify-between t-body">
+                <span className="text-muted">Studio</span>
+                <span className="font-700">The Echo Chamber</span>
+              </div>
+              <div className="flex justify-between t-body">
+                <span className="text-muted">Room</span>
+                <span className="font-700">Control Room A</span>
+              </div>
+              <div className="flex justify-between t-body">
+                <span className="text-muted">Date</span>
+                <span className="font-700">Monday, Oct 24</span>
+              </div>
+              <div className="flex justify-between t-body">
+                <span className="text-muted">Time</span>
+                <span className="font-700">09:00 AM — 12:00 PM (3 hrs)</span>
               </div>
             </div>
-          </div>
 
-          {/* Date & Time Details */}
-          <div className="space-y-2">
-            {parsedDates.map((date) => {
-              const times = selectedTimes?.[date.toDateString()] || [];
-              return (
-                <div key={date.toDateString()} className="p-3 rounded-lg bg-secondary/20">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Calendar className="h-4 w-4 text-primary" />
-                    <span className="font-medium">{format(date, "EEEE, MMMM d, yyyy")}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground pl-6">
-                    <Clock className="h-3.5 w-3.5" />
-                    <span>{times.length > 0 ? times.join(", ") : "No times selected"}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+            <div className="divider" />
 
-          {/* Total Amount */}
-          {totalAmount && (
-            <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10 border border-primary/20">
-              <span className="font-medium">Total Paid</span>
-              <span className="font-bold text-lg text-primary">
-                KES {totalAmount.toLocaleString()}
-              </span>
+            <div className="flex justify-between t-title" style={{ fontSize: '1.125rem' }}>
+              <span>Amount Settled</span>
+              <span className="text-paon">KES 11,025</span>
             </div>
-          )}
-
-          {/* Session Summary */}
-          <div className="text-center text-sm text-muted-foreground py-2">
-            {totalSlots} hour{totalSlots !== 1 ? "s" : ""} booked
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 pt-4">
-          <Button
-            size="lg"
-            className="w-full"
-            onClick={() => navigate("/bookings")}
-          >
-            View My Bookings
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full"
-            onClick={() => navigate("/home")}
-          >
-            <Home className="h-4 w-4 mr-2" />
-            Back to Home
-          </Button>
+        <div className="flex gap-4">
+          <button className="btn btn-paon" style={{ padding: '14px 28px' }} onClick={() => navigate('/artist/dashboard')}>
+            GO TO DASHBOARD
+          </button>
+          <button className="btn btn-outline" style={{ padding: '14px 28px' }}>
+            <CalendarIcon />
+            ADD TO CALENDAR
+          </button>
         </div>
 
-        {/* Additional Info */}
-        <div className="text-center text-xs text-muted-foreground pt-4 border-t border-border">
-          <p>A confirmation has been sent to your registered email.</p>
-          <p className="mt-1">Please arrive 10 minutes before your session.</p>
+        <div className="flex gap-8 mt-12">
+          <button className="btn btn-ghost t-small">
+            <ShareIcon />
+            Share session
+          </button>
+          <button className="btn btn-ghost t-small">
+            <DownloadIcon />
+            Download Receipt
+          </button>
         </div>
-      </Card>
+      </main>
+
+      <Footer />
     </div>
   );
 };

@@ -1,12 +1,12 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authApi } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
 
 interface User {
   id: string;
   email: string;
   full_name: string;
   role: string;
-  platform_role?: string; // Backend uses platform_role
+  platform_role?: string; 
   phone?: string;
   profile_img?: string;
 }
@@ -24,54 +24,36 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>({
+    id: "mock-user",
+    email: "owner@tizii.com",
+    full_name: "TIZII OWNER",
+    role: "studio_owner",
+  });
+  const [token, setToken] = useState<string | null>("mock-token");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Check for stored token on mount and restore session
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    
-    if (storedToken && storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setToken(storedToken);
-        setUser(parsedUser);
-      } catch (error) {
-        // Clear invalid data
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-      }
-    }
+    // Redesign phase: Always authorized with mock user
     setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await authApi.login({ email, password });
-    const { token, user } = response.data;
-    
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    setToken(token);
-    setUser(user);
+    console.log("Mock Login:", email);
+    setUser({ id: "mock-user", email, full_name: "TIZII OWNER", role: "studio_owner" });
+    setToken("mock-token");
   };
 
   const signup = async (fullName: string, email: string, password: string, role: string = 'artist') => {
-    const response = await authApi.signup({ full_name: fullName, email, password, role });
-    const { token, user } = response.data;
-    
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    setToken(token);
-    setUser(user);
+    console.log("Mock Signup:", email);
+    setUser({ id: "mock-user", email, full_name: fullName, role });
+    setToken("mock-token");
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setToken(null);
+  const logout = async () => {
+    console.log("Mock Logout");
     setUser(null);
+    setToken(null);
   };
 
   return (

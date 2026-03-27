@@ -1,345 +1,132 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { studiosApi, bookingsApi } from "@/lib/api";
-import { useToast } from "@/hooks/use-toast";
-import CreateUserDialog from "@/components/CreateUserDialog";
-import { 
-  Calendar as CalendarIcon, 
-  DollarSign, 
-  Users, 
-  Building2, 
-  TrendingUp,
-  Menu,
-  Plus
-} from "lucide-react";
-import ThemeToggle from "@/components/ThemeToggle";
-import { UserMenu } from "@/components/UserMenu";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { StudioManagement } from "@/components/StudioManagement";
-import { StudioFormDialog } from "@/components/StudioFormDialog";
+import { studiosApi, MOCK_STUDIOS, MOCK_SLOTS } from "@/lib/api";
+import SidebarNav from "@/components/SidebarNav";
+import StatusBadge from "@/components/StatusBadge";
+
+// Inline Icons
+const PlusIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+);
+const BuildingIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg>
+);
+const FilterIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+);
+const MoreIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+);
 
 const StudioOwnerDashboard = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [studios, setStudios] = useState<any[]>([]);
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [myStudios, setMyStudios] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  
-  // Studio Creation
-  const [studioDialogOpen, setStudioDialogOpen] = useState(false);
 
   useEffect(() => {
-    if (user?.role !== "studio_owner") {
-      navigate("/home");
-      return;
-    }
-    fetchData();
-  }, [user, navigate]);
-
-  const fetchData = async () => {
-    try {
-      const [studiosRes, bookingsRes] = await Promise.all([
-        studiosApi.getAll(),
-        bookingsApi.getAll(),
-      ]);
-      
-      // Backend returns { studios: [...] }
-      const allStudios = studiosRes.data.studios || (Array.isArray(studiosRes.data) ? studiosRes.data : []);
-      // Filter studios owned by this user
-      const myStudios = allStudios.filter((studio: any) => studio.owner_id === user?.id);
-      
-      // Fetch rooms for each studio
-      const studiosWithRooms = await Promise.all(
-        myStudios.map(async (studio: any) => {
-          try {
-            const roomsRes = await studiosApi.getRooms(studio.id);
-            const rooms = roomsRes.data.rooms || (Array.isArray(roomsRes.data) ? roomsRes.data : []);
-            return { ...studio, rooms };
-          } catch {
-            return { ...studio, rooms: [] };
-          }
-        })
-      );
-      
-      setStudios(studiosWithRooms);
-      setBookings(Array.isArray(bookingsRes.data) ? bookingsRes.data : []);
-    } catch (error: any) {
-      console.error("Failed to fetch studio owner data:", error);
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to fetch data",
-        variant: "destructive",
-      });
-      setStudios([]);
-      setBookings([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const [activeTab, setActiveTab] = useState("dashboard");
-
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full">
-      <div className="p-6 border-b">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-          Studio Owner
-        </h1>
-      </div>
-
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">Overview</p>
-        <Button 
-          variant={activeTab === "dashboard" ? "default" : "ghost"} 
-          className="w-full justify-start gap-3"
-          onClick={() => setActiveTab("dashboard")}
-        >
-          <CalendarIcon className="h-5 w-5" />
-          Dashboard
-        </Button>
-        <Button 
-          variant={activeTab === "studios" ? "default" : "ghost"} 
-          className="w-full justify-start gap-3"
-          onClick={() => setActiveTab("studios")}
-        >
-          <Building2 className="h-5 w-5" />
-          My Studios
-        </Button>
-        <Button 
-          variant={activeTab === "bookings" ? "default" : "ghost"} 
-          className="w-full justify-start gap-3"
-          onClick={() => navigate("/bookings")}
-        >
-          <Users className="h-5 w-5" />
-          Bookings
-        </Button>
-        
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mt-6 mb-2">Finance</p>
-        <Button 
-          variant={activeTab === "revenue" ? "default" : "ghost"} 
-          className="w-full justify-start gap-3"
-          onClick={() => setActiveTab("revenue")}
-        >
-          <DollarSign className="h-5 w-5" />
-          Revenue
-        </Button>
-        <Button 
-          variant={activeTab === "analytics" ? "default" : "ghost"} 
-          className="w-full justify-start gap-3"
-          onClick={() => setActiveTab("analytics")}
-        >
-          <TrendingUp className="h-5 w-5" />
-          Analytics
-        </Button>
-      </nav>
-
-      <div className="p-3 space-y-2 border-t">
-        <Button 
-          variant="ghost" 
-          className="w-full justify-start gap-3 hover:bg-accent"
-          onClick={() => navigate("/settings")}
-        >
-          <DollarSign className="h-5 w-5" />
-          Settings
-        </Button>
-      </div>
-    </div>
-  );
-
-  const totalRevenue = bookings
-    .filter((b) => b.status === "confirmed")
-    .reduce((sum, b) => sum + (b.amount || 0), 0);
-
-  const totalBookings = bookings.length;
-  const pendingBookings = bookings.filter((b) => b.status === "pending");
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-lg">Loading...</div>
-      </div>
-    );
-  }
+    // In actual app, filter by owner_id. Mock: take first 3 studios.
+    setMyStudios(MOCK_STUDIOS.slice(0, 3));
+    setIsLoading(false);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex fixed left-0 top-0 h-full w-64 bg-card border-r flex-col z-50">
-        <SidebarContent />
-      </aside>
-
-      {/* Mobile Sidebar */}
-      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="w-64 p-0 flex flex-col">
-          <SidebarContent />
-        </SheetContent>
-      </Sheet>
-
-      {/* Main Content */}
-      <div className="lg:ml-64">
-        {/* Header */}
-        <header className="border-b bg-card/50 backdrop-blur sticky top-0 z-30">
-          <div className="px-4 lg:px-8 py-4 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2 flex-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="lg:hidden"
-                onClick={() => setSidebarOpen(true)}
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-              <input 
-                type="search" 
-                placeholder="Search..." 
-                className="w-full max-w-md px-4 py-2 rounded-lg border bg-background text-sm"
-              />
-            </div>
-            <div className="flex items-center gap-2 lg:gap-4">
-              <ThemeToggle />
-              <UserMenu />
-            </div>
+    <div className="flex" style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+      <SidebarNav type="owner" />
+      
+      <main className="flex-1 p-12" style={{ maxWidth: 1400, margin: '0 auto' }}>
+        <header className="flex justify-between items-end mb-12">
+          <div>
+            <p className="t-label mb-2">OWNERSHIP GOVERNANCE</p>
+            <h1 className="t-headline">Studio Governance</h1>
+          </div>
+          <div className="flex gap-4 items-center">
+            <button className="btn btn-paon">
+              <PlusIcon />
+              LIST NEW STUDIO
+            </button>
+            <div className="avatar">SO</div>
           </div>
         </header>
 
-        {/* Dashboard Content */}
-        <main className="p-4 lg:p-8">
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-3 mb-6">
-            <CreateUserDialog 
-              role="studio_manager" 
-              buttonLabel="Create Studio Manager"
-              title="Create Studio Manager"
-            />
-            <CreateUserDialog 
-              role="studio_staff" 
-              buttonLabel="Create Studio Staff"
-              title="Create Studio Staff"
-            />
+        {/* Studio Grid */}
+        <div className="grid-3 mb-12">
+          {isLoading ? (
+            Array(3).fill(0).map((_, i) => <div key={i} className="card animate-pulse" style={{ height: 200 }} />)
+          ) : myStudios.map(studio => (
+            <div key={studio.id} className="card card-interactive">
+              <div className="card-body">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="text-paon"><BuildingIcon /></div>
+                  <button className="btn btn-ghost" style={{ padding: 4 }}><MoreIcon /></button>
+                </div>
+                <h3 className="t-title mb-1">{studio.name}</h3>
+                <p className="t-small mb-4 text-muted">{studio.location}</p>
+                <div className="divider mb-4" />
+                <div className="flex justify-between items-end">
+                   <div>
+                      <p className="t-label mb-1">REVENUE (MTD)</p>
+                      <span className="font-700">KES {(studio.price_per_hour * 40).toLocaleString()}</span>
+                   </div>
+                   <div style={{ textAlign: 'right' }}>
+                      <p className="t-label mb-1">UTILIZATION</p>
+                      <span className="text-lemon font-700">74%</span>
+                   </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
 
-            <Button variant="outline" className="gap-2" onClick={() => setStudioDialogOpen(true)}>
-              <Plus className="h-4 w-4" />
-              Create Studio
-            </Button>
+        <div className="grid-2" style={{ gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'start' }}>
+          {/* Slot Architecture Panel */}
+          <div className="card">
+            <div className="card-body-lg" style={{ borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between' }}>
+              <h3 className="t-title">Slot Architecture</h3>
+              <button className="btn btn-outline btn-sm">MANAGE ALL</button>
+            </div>
+            <div className="card-body-lg flex-col gap-4">
+               {MOCK_SLOTS.slice(0, 4).map((slot, i) => (
+                 <div key={i} className="flex justify-between items-center p-4 rounded-lg bg-elevated border border-border">
+                    <div className="flex gap-4 items-center">
+                       <div>
+                          <h4 className="t-title" style={{ fontSize: '1rem' }}>{slot.date}</h4>
+                          <p className="t-label text-muted">{slot.time}</p>
+                       </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                       <StatusBadge status={slot.status} />
+                       <button className="btn btn-ghost" style={{ padding: 4 }}><MoreIcon /></button>
+                    </div>
+                 </div>
+               ))}
+               <button className="btn btn-outline btn-full mt-4">VIEW FULL CALENDAR</button>
+            </div>
           </div>
 
-            {/* Stats Overview */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card className="glass">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                  <DollarSign className="h-4 w-4 text-primary" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">KES {(totalRevenue || 0).toLocaleString()}</div>
-                </CardContent>
-              </Card>
-              <Card className="glass">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
-                  <CalendarIcon className="h-4 w-4 text-primary" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{totalBookings}</div>
-                </CardContent>
-              </Card>
-              <Card className="glass">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">My Studios</CardTitle>
-                  <Building2 className="h-4 w-4 text-primary" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{studios.length}</div>
-                </CardContent>
-              </Card>
-              <Card className="glass">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Pending Bookings</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{pendingBookings.length}</div>
-                </CardContent>
-              </Card>
+          {/* Activity / Notifications */}
+          <div className="card">
+            <div className="card-body-lg" style={{ borderBottom: '1px solid var(--border)' }}>
+              <h3 className="t-title">Governance Alerts</h3>
             </div>
-
-          {/* Studios & Rooms Management */}
-          <Card className="mb-6 lg:mb-8 mt-6">
-            <CardHeader>
-              <CardTitle>My Studios & Rooms</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {studios.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">
-                  No studios yet. Create your first studio above.
-                </p>
-              ) : (
-                <StudioManagement studios={studios} onRefresh={fetchData} showCreateStudio={false} canManageStudios={true} />
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Studio Form Dialog */}
-          <StudioFormDialog
-            open={studioDialogOpen}
-            onOpenChange={setStudioDialogOpen}
-            onSuccess={fetchData}
-            ownerId={user?.id}
-          />
-
-            {/* Recent Bookings */}
-            <Card className="glass">
-              <CardHeader>
-                <CardTitle>Recent Bookings</CardTitle>
-                <CardDescription>Latest bookings across all studios</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {bookings.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">No bookings yet</p>
-                ) : (
-                  <div className="space-y-4">
-                    {bookings.slice(0, 5).map((booking) => (
-                      <Card key={booking.id} className="glass-strong">
-                        <CardContent className="pt-6">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium">
-                                {studios.find((s) => s.id === booking.studio_id)?.name}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {new Date(booking.start_time).toLocaleDateString()}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-medium">KES {booking.amount}</p>
-                              <span
-                                className={`text-xs px-2 py-1 rounded ${
-                                  booking.status === "confirmed"
-                                    ? "bg-green-500/20 text-green-500"
-                                    : booking.status === "pending"
-                                    ? "bg-yellow-500/20 text-yellow-500"
-                                    : "bg-red-500/20 text-red-500"
-                                }`}
-                              >
-                                {booking.status}
-                              </span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-        </main>
-      </div>
+            <div className="card-body-lg flex-col gap-4">
+               {[
+                 { type: 'Booking', msg: 'New Session Confirmed: "The Echo Chamber" for Oct 24.', time: '2 mins ago' },
+                 { type: 'Payment', msg: 'Settlement processed: KES 14,000 via M-Pesa.', time: '1 hour ago' },
+                 { type: 'System', msg: 'New studio manager "Amira" added to network.', time: '4 hours ago' }
+               ].map((alert, i) => (
+                 <div key={i} className="flex gap-4 p-4 rounded-lg bg-subtle border border-transparent">
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--lemon)', marginTop: 6 }} />
+                    <div className="flex-1">
+                       <div className="flex justify-between mb-1">
+                          <span className="t-label text-paon">{alert.type}</span>
+                          <span className="t-small text-muted">{alert.time}</span>
+                       </div>
+                       <p className="t-small" style={{ lineHeight: 1.4 }}>{alert.msg}</p>
+                    </div>
+                 </div>
+               ))}
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 };
